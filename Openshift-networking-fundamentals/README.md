@@ -3,7 +3,7 @@
 ### No pod network with a service and routes like vmware using a dv switch.
 ### It's a 2 step process.
 
-Step 1.
+Step 1. - Create the localnet.
 
 a. Map a new localnet name.
 b. Use the br-ex or any other custom bridge.
@@ -30,7 +30,7 @@ spec:
           state: present
 ```
 ```
-Step 2.
+Step 2. - Create the NAD.
 
 a. Create a nad and specify the name of the localnet to match.
 b. Match the namespace.
@@ -56,7 +56,68 @@ spec:
       "vlanID": 1105                                    ### Tag the correct vlan ID.
     }
 ```
-Step 3
+Step 3 - Assing the localnet to the vm.
 
 1. Create a vm -> Network Interfaces (tab) -> 3 dots (edit) and replace the Pod networking with the new vlan "default/vlan-1105-br-ex".
 2. Use the internal ipam to hand over IP's, but to do it manually.  Go to scripts -> Edit Cloud-init -> In the popup window select "Add network data", in the Ethernet name filed type "eth0" and enter the IP info.  After that you can ping, etc....
+...........................................................................................
+### Another type of localnet - Like in OpenStack - non routable tenant networks.  The use case is for multiple teams or projects to share the same envrionment and to give them the ability to create their own internal and isolated networks.
+### Multiple team might choose to have overlapping IPs.
+
+### Below is an example of a layer 2 secondary network.
+### There's no need to create a bridge mapping.
+
+a. Just need to specify the network name.
+b. The project or namespace.
+c. Topology is "layer 2".
+
+```
+$ cat l2-private-net.yaml
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  name: chrisj-private-net1
+  namespace: chrisj
+spec:
+  config: |2
+    {
+            "cniVersion": "0.3.1",
+            "name": "chrisj-private-net1",
+            "type": "ovn-k8s-cni-overlay",
+            "topology":"layer2",
+            "mtu": 1300,
+            "netAttachDefName": "chrisj/chrisj-private-net1"
+    }
+```
+...........................................................................................
+### Microsegmentation (network policies) with secondary networks.
+### Instead of network policies use multinetworkpolices.
+
+Networking -> MultiNeteworkPolices -> Policy Name -> Select the private network we created that we want to secure -> specify ingress and egress rules.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
