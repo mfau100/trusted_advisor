@@ -1,3 +1,4 @@
+### Creating a localnet or a secondary network.
 ### Connect vm's to the external network using a localnet with a vlan.  
 ### No pod network with a service and routes like vmware using a dv switch.
 ### It's a 2 step process.
